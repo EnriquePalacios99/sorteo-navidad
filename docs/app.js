@@ -25,26 +25,23 @@ function toast(msg) {
 }
 
 /* ==== acceso: ver el amigo secreto ==== */
-// Regla: cada persona ve SU cartilla una sola vez (por dispositivo). Es un control de buena fe en el navegador.
+// Regla: cada cartilla se puede abrir una sola vez por dispositivo (se pide confirmar "¿Eres tú?").
+// Es un control de buena fe en el navegador, no una seguridad real.
 const seenKey = (id) => `sorteo_seen_${data.year}_${id}`;
 function seenGet(id) { try { return !!localStorage.getItem(seenKey(id)); } catch { return false; } }
 function seenSet(id) { try { localStorage.setItem(seenKey(id), '1'); } catch {} }
 const sessionViewed = new Set(); // permite voltear/desvoltear mientras no recargues la pagina
-function can(id) {
-  const me = getMe();
-  if (!me) return false;
-  return me === id && (!seenGet(me) || sessionViewed.has(me));
-}
+function can(id) { return !seenGet(id) || sessionViewed.has(id); }
 /* ==== fin acceso ==== */
 
 const HUES = [352, 152, 212, 32, 282, 188, 44]; // un color por familia
 
 function cardHtml(person, hue) {
   const friend = byId[data.assign[person.id]];
-  const me = getMe(), see = can(person.id), mine = me === person.id;
-  const badge = !me || see ? '' : mine ? '✅ ya la viste' : '🔒';
+  const see = can(person.id);
+  const badge = see ? '' : '✅ ya vista';
   return `
-  <div class="flip ${flipped.has(person.id) ? 'flipped' : ''} ${mine ? 'mine' : ''} ${me && !see ? 'locked' : ''}" data-id="${person.id}" style="--h:${hue}">
+  <div class="flip ${flipped.has(person.id) ? 'flipped' : ''} ${see ? '' : 'locked'}" data-id="${person.id}" style="--h:${hue}">
     <div class="inner">
       <div class="face front">
         ${badge ? `<span class="lock">${badge}</span>` : ''}
@@ -54,7 +51,7 @@ function cardHtml(person, hue) {
       </div>
       <div class="face back">
         ${see ? `<div class="lab">Te toca regalar a</div>
-        <div class="friend-big"><div class="avatar">🎁</div><div class="friend">${esc(friend.name)}</div></div>` : '<div class="lab" style="margin-top:44px">🔒 Cartilla bloqueada</div>'}
+        <div class="friend-big"><div class="avatar">🎁</div><div class="friend">${esc(friend.name)}</div></div>` : '<div class="lab" style="margin-top:44px">🔒 Esta cartilla ya fue vista</div>'}
         <div class="tap-back">Toca para volver</div>
       </div>
     </div>
@@ -77,53 +74,23 @@ function render() {
   }).join('');
   $('board').innerHTML = cols ? `<div class="fams">${cols}</div>` : '<p class="none">No encontré ese nombre 🤔</p>';
   updateStats();
-  renderCfg();
 }
 
 $('board').addEventListener('click', (e) => {
   const card = e.target.closest('.flip');
   if (!card) return;
-  const id = card.dataset.id, me = getMe();
-  if (!me) { toast('👆 Primero elige quién eres en ⚙️ Configuración'); location.hash = '#/config'; return; }
-  if (!can(id)) {
-    toast(me === id ? '✅ Ya viste tu amigo secreto. Si necesitas verlo otra vez, pídeselo al organizador.' : '🔒 Solo puedes ver tu propia cartilla.');
-    return;
-  }
+  const id = card.dataset.id;
+  if (!can(id)) { toast('🔒 Esta cartilla ya fue vista. Si necesitas verla otra vez, pídeselo al organizador.'); return; }
+  if (!flipped.has(id) && !confirm(`¿Eres ${byId[id].name}?\n\nSolo podrás ver tu amigo secreto una vez en este dispositivo.`)) return;
   const on = card.classList.toggle('flipped');
-  if (on) {
-    flipped.add(id); confetti();
-    if (me === id) { seenSet(me); sessionViewed.add(me); } // 1ra y unica vista
-  } else flipped.delete(id);
+  if (on) { flipped.add(id); confetti(); seenSet(id); sessionViewed.add(id); } // 1ra y unica vista
+  else flipped.delete(id);
 });
-
-function buildWho() {
-  $('cWho').innerHTML = '<option value="">— Elige tu nombre —</option>' + data.families.map((f) =>
-    `<optgroup label="${esc(f.name)}">${f.people.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}</optgroup>`).join('');
-}
 
 $('search').addEventListener('input', render);
 
-/* ---------- configuracion del participante (recuerda quien eres en este dispositivo) ---------- */
-const ME_KEY = 'sorteo_me';
-function getMe() { try { const v = localStorage.getItem(ME_KEY); return v && byId[v] ? v : null; } catch { return null; } }
-function setMe(id) { try { id ? localStorage.setItem(ME_KEY, id) : localStorage.removeItem(ME_KEY); } catch {} }
-function renderCfg() {
-  const id = $('cWho').value;
-  $('cBody').classList.toggle('hidden', !id);
-  if (!id || !byId[id]) return;
-  $('cName').textContent = byId[id].name;
-  $('cStatus').textContent = seenGet(id) ? '✅ Ya viste tu amigo secreto' : 'Aún no has visto tu amigo secreto';
-  $('cStatus').className = 'cstat' + (seenGet(id) ? ' ok' : '');
-}
-function initCfg() {
-  const me = getMe(); if (me) $('cWho').value = me;
-  renderCfg();
-  $('cWho').addEventListener('change', () => { setMe($('cWho').value); renderCfg(); render(); });
-  $('cForget').addEventListener('click', () => { setMe(null); $('cWho').value = ''; renderCfg(); render(); toast('Listo: este dispositivo ya no te recuerda.'); });
-}
-
 /* ---------- menu y secciones ---------- */
-const ROUTES = ['sorteo', 'itinerario', 'config'];
+const ROUTES = ['sorteo', 'itinerario'];
 function setMenu(open) { $('ddMenu').classList.toggle('hidden', !open); $('ddBtn').setAttribute('aria-expanded', String(open)); }
 function route() {
   const r = location.hash.replace('#/', '');
@@ -155,8 +122,6 @@ async function loadItinerary() {
   data = await (await fetch(`sorteos/${current}.json`, { cache: 'no-store' })).json();
   data.families.forEach((f) => f.people.forEach((p) => (byId[p.id] = p)));
   $('year').textContent = data.year;
-  buildWho();
-  initCfg();
   render();
   route();
   loadItinerary();
