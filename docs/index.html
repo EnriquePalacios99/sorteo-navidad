@@ -57,10 +57,24 @@
   h2.fam em { font-style:normal; font-size:.72rem; color:#cfe3d8; background:var(--glass); border:1px solid var(--line); border-radius:999px; padding:2px 9px; }
   .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:16px; }
   /* familias una al costado de otra: cada familia es una columna con sus cartillas */
-  .fams { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:18px; align-items:start; margin-top:18px; }
+  .fams { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px; align-items:start; margin-top:18px; }
   .fams > section { background:rgba(255,255,255,.05); border:1px solid var(--line); border-radius:24px; padding:14px; }
   .fams h2.fam { margin:2px 0 14px; }
-  .fams .grid { grid-template-columns:1fr; gap:14px; }
+  /* cartillas compactas en cuadricula de 2 columnas dentro de cada familia */
+  .fams .grid { grid-template-columns:repeat(2, 1fr); gap:10px; }
+  .fams .flip { height:200px; }
+  .fams .face { padding:12px 8px; border-radius:16px; }
+  .fams .avatar { width:50px; height:50px; font-size:1.7rem; }
+  .fams .nm { margin:8px 0 6px; font-size:.95rem; }
+  .fams .chip { font-size:.62rem; padding:3px 8px; }
+  .fams .hint, .fams .tap-back { display:none; }
+  .fams .back .lab { font-size:.58rem; }
+  .fams .friend-row { margin:4px 0 6px; gap:7px; }
+  .fams .avatar.sm { width:30px; height:30px; font-size:1.05rem; border-width:1.5px; }
+  .fams .friend { font-size:.9rem; }
+  .fams .back .prefs { font-size:.7rem; padding-top:6px; }
+  .fams .pref-row { margin-bottom:5px; }
+  .fams .pref-row b { font-size:.56rem; }
   .none { text-align:center; color:#b6d0c1; margin-top:40px; }
 
   /* cartilla volteable */
