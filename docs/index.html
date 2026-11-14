@@ -60,6 +60,11 @@
   .fams { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px; align-items:start; margin-top:18px; }
   .fams > section { background:rgba(255,255,255,.05); border:1px solid var(--line); border-radius:24px; padding:14px; }
   .fams h2.fam { margin:2px 0 14px; }
+  .crown { position:absolute; top:8px; left:10px; font-size:1rem; }
+  .lock { position:absolute; top:8px; right:8px; font-size:.62rem; font-weight:700; background:rgba(0,0,0,.4); padding:2px 7px; border-radius:999px; }
+  .flip.locked { cursor:not-allowed; }
+  .flip.locked .front { filter:saturate(.45) brightness(.85); }
+  .flip.mine .front { box-shadow:0 0 0 3px var(--gold), 0 14px 34px rgba(0,0,0,.35); }
   /* cartillas compactas en cuadricula de 2 columnas dentro de cada familia */
   .fams .grid { grid-template-columns:repeat(2, 1fr); gap:10px; }
   .fams .flip { height:200px; }
@@ -207,7 +212,7 @@
   <header>
     <span class="eyebrow">🎄 Navidad en familia</span>
     <h1>Amigo Secreto <span class="year" id="year"></span></h1>
-    <p class="lead">Busca tu cartilla y tócala: al reverso está la persona a la que le regalas, con sus gustos.</p>
+    <p class="lead">Primero elige quién eres en <b>⚙️ Configuración</b>. Luego toca tu cartilla: al reverso está tu amigo secreto. <b>Solo puedes verlo una vez</b>; los líderes 👑 ven toda su familia.</p>
     <div id="banner" class="banner hidden"></div>
 
     <div class="stats">

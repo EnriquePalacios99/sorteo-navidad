@@ -29,6 +29,23 @@ function prefsHtml(id) {
     : '<div class="empty">Aún no llena sus gustos 💡 ¡Vuelve más tarde!</div>';
 }
 
+/* ==== acceso: ver el amigo secreto ==== */
+// Regla: cada persona ve SU cartilla una sola vez (por dispositivo). Los lideres de familia ven
+// las cartillas de toda su familia las veces que quieran. Es un control de buena fe en el navegador.
+const famOf = (id) => data.families.find((f) => f.people.some((p) => p.id === id));
+const isLeaderId = (id) => (data.leaders || []).includes(id);
+const seenKey = (id) => `sorteo_seen_${data.year}_${id}`;
+function seenGet(id) { try { return !!localStorage.getItem(seenKey(id)); } catch { return false; } }
+function seenSet(id) { try { localStorage.setItem(seenKey(id), '1'); } catch {} }
+const sessionViewed = new Set(); // permite voltear/desvoltear mientras no recargues la pagina
+function can(id) {
+  const me = getMe();
+  if (!me) return false;
+  if (isLeaderId(me)) return famOf(me) === famOf(id);
+  return me === id && (!seenGet(me) || sessionViewed.has(me));
+}
+/* ==== fin acceso ==== */
+
 const HUES = [352, 152, 212, 32, 282, 188, 44]; // un color por familia
 // 60 avatares en 4 categorias; cada persona tiene uno distinto por defecto y puede elegir otro
 const AV_CATS = [
@@ -79,19 +96,22 @@ $('aSave').addEventListener('click', async () => {
 function cardHtml(person, hue) {
   const friend = byId[data.assign[person.id]];
   const filled = profiles[person.id] && profiles[person.id].prefs;
+  const me = getMe(), see = can(person.id), mine = me === person.id;
+  const badge = !me || see ? '' : mine ? '✅ ya la viste' : '🔒';
   return `
-  <div class="flip ${flipped.has(person.id) ? 'flipped' : ''}" data-id="${person.id}" style="--h:${hue}">
+  <div class="flip ${flipped.has(person.id) ? 'flipped' : ''} ${mine ? 'mine' : ''} ${me && !see ? 'locked' : ''}" data-id="${person.id}" style="--h:${hue}">
     <div class="inner">
       <div class="face front">
+        ${isLeaderId(person.id) ? '<span class="crown" title="Líder de familia">👑</span>' : ''}${badge ? `<span class="lock">${badge}</span>` : ''}
         <div class="avatar">${avatarOf(person.id)}</div>
         <div class="nm">${esc(person.name)}</div>
         <div class="chip ${filled ? 'ok' : ''}">${filled ? '✓ gustos listos' : 'sin gustos aún'}</div>
         <div class="hint">Toca para descubrir 🎁</div>
       </div>
       <div class="face back">
-        <div class="lab">Te toca regalar a</div>
+        ${see ? `<div class="lab">Te toca regalar a</div>
         <div class="friend-row"><div class="avatar sm">${avatarOf(friend.id)}</div><div class="friend">${esc(friend.name)}</div></div>
-        <div class="prefs">${prefsHtml(friend.id)}</div>
+        <div class="prefs">${prefsHtml(friend.id)}</div>` : '<div class="lab" style="margin-top:44px">🔒 Cartilla bloqueada</div>'}
         <div class="tap-back">Toca para volver</div>
       </div>
     </div>
@@ -124,9 +144,17 @@ function render() {
 $('board').addEventListener('click', (e) => {
   const card = e.target.closest('.flip');
   if (!card) return;
-  const id = card.dataset.id;
+  const id = card.dataset.id, me = getMe();
+  if (!me) { toast('👆 Primero elige quién eres en ⚙️ Configuración'); location.hash = '#/config'; return; }
+  if (!can(id)) {
+    toast(me === id ? '✅ Ya viste tu amigo secreto. Solo el admin puede autorizar otra vista.' : '🔒 Solo puedes ver tu propia cartilla.');
+    return;
+  }
   const on = card.classList.toggle('flipped');
-  on ? (flipped.add(id), confetti()) : flipped.delete(id);
+  if (on) {
+    flipped.add(id); confetti();
+    if (me === id && !isLeaderId(me)) { seenSet(me); sessionViewed.add(me); } // 1ra y unica vista
+  } else flipped.delete(id);
 });
 
 // Paso 1: elegir quien eres. Paso 2: llenar el formulario.
@@ -188,16 +216,16 @@ function renderCfg() {
   const filled = profiles[id] && profiles[id].prefs;
   $('cAvatar').textContent = avatarOf(id);
   $('cName').textContent = byId[id].name;
-  $('cStatus').textContent = filled ? '✓ Gustos listos' : 'Aún sin gustos';
+  $('cStatus').textContent = (filled ? '✓ Gustos listos' : 'Aún sin gustos') + (isLeaderId(id) ? ' · 👑 Líder de familia' : '');
   $('cStatus').className = 'cstat' + (filled ? ' ok' : '');
 }
 function initCfg() {
   const me = getMe(); if (me) $('cWho').value = me;
   renderCfg();
-  $('cWho').addEventListener('change', () => { setMe($('cWho').value); renderCfg(); });
+  $('cWho').addEventListener('change', () => { setMe($('cWho').value); renderCfg(); render(); });
   $('cAvatarBtn').addEventListener('click', () => openAvatar($('cWho').value));
   $('cPrefsBtn').addEventListener('click', () => openModal($('cWho').value));
-  $('cForget').addEventListener('click', () => { setMe(null); $('cWho').value = ''; renderCfg(); toast('Listo: este dispositivo ya no te recuerda.'); });
+  $('cForget').addEventListener('click', () => { setMe(null); $('cWho').value = ''; renderCfg(); render(); toast('Listo: este dispositivo ya no te recuerda.'); });
 }
 
 const ROUTES = ['sorteo', 'itinerario', 'config'];
