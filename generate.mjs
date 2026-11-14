@@ -38,7 +38,7 @@ const families = Object.entries(fams).map(([family, names]) => ({
   label: familyLabel(family),
   people: names.map((entry) => {
     const e = typeof entry === 'string' ? { name: entry } : entry;
-    return { id: 'p' + String(++n).padStart(2, '0'), full: e.name, label: personLabel(e), family, leader: !!e.leader };
+    return { id: 'p' + String(++n).padStart(2, '0'), full: e.name, label: personLabel(e), family };
   }),
 }));
 const people = families.flatMap((f) => f.people);
@@ -51,13 +51,11 @@ for (const [kind, labels] of checks) {
 }
 
 const publicFamilies = families.map((f) => ({ name: f.label, people: f.people.map((p) => ({ id: p.id, name: p.label })) }));
-const leaders = people.filter((p) => p.leader).map((p) => p.id); // solo ids: lideres de familia
-
 if (relabel) {
   const cur = JSON.parse(readFileSync(file, 'utf8'));
   const ids = people.map((p) => p.id).sort().join();
   if (Object.keys(cur.assign).sort().join() !== ids) throw new Error('participants.json ya no coincide con el sorteo existente');
-  writeFileSync(file, JSON.stringify({ year: cur.year, families: publicFamilies, leaders, assign: cur.assign }, null, 1));
+  writeFileSync(file, JSON.stringify({ year: cur.year, families: publicFamilies, assign: cur.assign }, null, 1));
   console.log(`OK: etiquetas del sorteo ${cur.year} actualizadas. La asignacion NO cambio.`);
   process.exit(0);
 }
@@ -74,6 +72,6 @@ const assign = {};
 order.forEach((p, i) => (assign[p.id] = order[(i + 1) % order.length].id));
 
 mkdirSync(dir, { recursive: true });
-writeFileSync(file, JSON.stringify({ year, families: publicFamilies, leaders, assign }, null, 1), { flag: 'wx' }); // 'wx': falla si ya existe
+writeFileSync(file, JSON.stringify({ year, families: publicFamilies, assign }, null, 1), { flag: 'wx' }); // 'wx': falla si ya existe
 writeFileSync(`${dir}/index.json`, JSON.stringify({ current: year }));
 console.log(`OK: sorteo ${year} creado (${people.length} participantes, ${families.length} familias). Ya no se puede regenerar.`);

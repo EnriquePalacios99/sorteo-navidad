@@ -1,10 +1,10 @@
-import { getStore } from './store.js';
-
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+// quita tildes para que la busqueda funcione sin acentos (rango de marcas combinantes U+0300-U+036F)
+const MARKS = new RegExp('[' + String.fromCharCode(0x300) + '-' + String.fromCharCode(0x36f) + ']', 'g');
+const norm = (s) => s.normalize('NFD').replace(MARKS, '').toLowerCase();
 
-let data, store, profiles = {}, byId = {};
+let data, byId = {};
 const flipped = new Set();
 
 function confetti() {
@@ -19,11 +19,13 @@ function confetti() {
   }
 }
 
+function toast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 3200);
+}
+
 /* ==== acceso: ver el amigo secreto ==== */
-// Regla: cada persona ve SU cartilla una sola vez (por dispositivo). Los lideres de familia ven
-// las cartillas de toda su familia las veces que quieran. Es un control de buena fe en el navegador.
-const famOf = (id) => data.families.find((f) => f.people.some((p) => p.id === id));
-const isLeaderId = (id) => (data.leaders || []).includes(id);
+// Regla: cada persona ve SU cartilla una sola vez (por dispositivo). Es un control de buena fe en el navegador.
 const seenKey = (id) => `sorteo_seen_${data.year}_${id}`;
 function seenGet(id) { try { return !!localStorage.getItem(seenKey(id)); } catch { return false; } }
 function seenSet(id) { try { localStorage.setItem(seenKey(id), '1'); } catch {} }
@@ -31,57 +33,11 @@ const sessionViewed = new Set(); // permite voltear/desvoltear mientras no recar
 function can(id) {
   const me = getMe();
   if (!me) return false;
-  if (isLeaderId(me)) return famOf(me) === famOf(id);
   return me === id && (!seenGet(me) || sessionViewed.has(me));
 }
 /* ==== fin acceso ==== */
 
 const HUES = [352, 152, 212, 32, 282, 188, 44]; // un color por familia
-// 60 avatares en 4 categorias; cada persona tiene uno distinto por defecto y puede elegir otro
-const AV_CATS = [
-  { name: '🎄 Navidad', list: ['🎅', '🤶', '🧑‍🎄', '🦌', '⛄', '🎄', '⭐', '🎁', '🔔', '🍪', '🧦', '❄️', '🌟', '🧝', '🕯️'] },
-  { name: '🐾 Animales', list: ['🐶', '🐱', '🐰', '🦊', '🐼', '🐨', '🦁', '🐯', '🐸', '🐵', '🐧', '🦉', '🦄', '🐢', '🐙'] },
-  { name: '🦸 Héroes', list: ['🦸', '🦸‍♀️', '🦸‍♂️', '🦹', '🦹‍♀️', '🥷', '🧙', '🧙‍♀️', '🧛', '🧜‍♀️', '🧚', '🧞', '🤖', '👽', '🦇'] },
-  { name: '😎 Divertidos', list: ['😎', '🤠', '🥳', '🤩', '😺', '🤡', '👻', '🐲', '🦖', '🐬', '🦋', '🐝', '🌈', '🍕', '🍩'] },
-];
-const AVATARS = AV_CATS.flatMap((c) => c.list);
-const avatarOf = (id) => (profiles[id] && profiles[id].avatar) || AVATARS[(parseInt(id.slice(1), 10) * 7) % AVATARS.length];
-
-let aId = null, aSel = null, aCat = 0;
-function renderAv() {
-  $('aTabs').innerHTML = AV_CATS.map((c, i) => `<button type="button" class="atab ${i === aCat ? 'on' : ''}" data-c="${i}">${c.name}</button>`).join('');
-  $('aGrid').innerHTML = AV_CATS[aCat].list.map((a) => `<button type="button" class="av ${a === aSel ? 'on' : ''}" data-a="${a}">${a}</button>`).join('');
-  $('aPrev').textContent = aSel || '❔';
-}
-function openAvatar(pre) {
-  aId = null; $('aWho').value = ''; $('aBody').classList.add('hidden'); $('aSave').classList.add('hidden');
-  $('aErr').textContent = ''; $('avModal').classList.remove('hidden');
-  if (pre) { $('aWho').value = pre; $('aWho').dispatchEvent(new Event('change')); }
-}
-const closeAv = () => $('avModal').classList.add('hidden');
-$('openAvatar').addEventListener('click', () => openAvatar(getMe()));
-$('aCancel').addEventListener('click', closeAv);
-$('avModal').addEventListener('click', (e) => e.target === $('avModal') && closeAv());
-$('aWho').addEventListener('change', () => {
-  aId = $('aWho').value || null;
-  $('aBody').classList.toggle('hidden', !aId); $('aSave').classList.toggle('hidden', !aId);
-  if (!aId) return;
-  aSel = avatarOf(aId);
-  aCat = Math.max(0, AV_CATS.findIndex((c) => c.list.includes(aSel)));
-  renderAv();
-});
-$('aTabs').addEventListener('click', (e) => { const b = e.target.closest('.atab'); if (b) { aCat = +b.dataset.c; renderAv(); } });
-$('aGrid').addEventListener('click', (e) => { const b = e.target.closest('.av'); if (b) { aSel = b.dataset.a; renderAv(); } });
-$('aSave').addEventListener('click', async () => {
-  if (!aId) return;
-  $('aSave').disabled = true;
-  try {
-    const rec = { ...(profiles[aId] || {}), avatar: aSel, ts: Date.now() };
-    await store.setProfile(`${data.year}_${aId}`, rec);
-    profiles[aId] = rec; closeAv(); render(); toast('✅ ¡Avatar guardado! ' + aSel);
-  } catch (e) { console.error(e); $('aErr').textContent = 'No se pudo guardar. Intenta de nuevo.'; }
-  $('aSave').disabled = false;
-});
 
 function cardHtml(person, hue) {
   const friend = byId[data.assign[person.id]];
@@ -91,14 +47,14 @@ function cardHtml(person, hue) {
   <div class="flip ${flipped.has(person.id) ? 'flipped' : ''} ${mine ? 'mine' : ''} ${me && !see ? 'locked' : ''}" data-id="${person.id}" style="--h:${hue}">
     <div class="inner">
       <div class="face front">
-        ${isLeaderId(person.id) ? '<span class="crown" title="Líder de familia">👑</span>' : ''}${badge ? `<span class="lock">${badge}</span>` : ''}
-        <div class="avatar">${avatarOf(person.id)}</div>
+        ${badge ? `<span class="lock">${badge}</span>` : ''}
+        <div class="avatar">🎁</div>
         <div class="nm">${esc(person.name)}</div>
         <div class="hint">Toca para descubrir 🎁</div>
       </div>
       <div class="face back">
         ${see ? `<div class="lab">Te toca regalar a</div>
-        <div class="friend-big"><div class="avatar">${avatarOf(friend.id)}</div><div class="friend">${esc(friend.name)}</div></div>` : '<div class="lab" style="margin-top:44px">🔒 Cartilla bloqueada</div>'}
+        <div class="friend-big"><div class="avatar">🎁</div><div class="friend">${esc(friend.name)}</div></div>` : '<div class="lab" style="margin-top:44px">🔒 Cartilla bloqueada</div>'}
         <div class="tap-back">Toca para volver</div>
       </div>
     </div>
@@ -106,8 +62,7 @@ function cardHtml(person, hue) {
 }
 
 function updateStats() {
-  const total = Object.keys(byId).length;
-  $('statTotal').textContent = total;
+  $('statTotal').textContent = Object.keys(byId).length;
   $('statFams').textContent = data.families.length;
 }
 
@@ -131,29 +86,23 @@ $('board').addEventListener('click', (e) => {
   const id = card.dataset.id, me = getMe();
   if (!me) { toast('👆 Primero elige quién eres en ⚙️ Configuración'); location.hash = '#/config'; return; }
   if (!can(id)) {
-    toast(me === id ? '✅ Ya viste tu amigo secreto. Solo el admin puede autorizar otra vista.' : '🔒 Solo puedes ver tu propia cartilla.');
+    toast(me === id ? '✅ Ya viste tu amigo secreto. Si necesitas verlo otra vez, pídeselo al organizador.' : '🔒 Solo puedes ver tu propia cartilla.');
     return;
   }
   const on = card.classList.toggle('flipped');
   if (on) {
     flipped.add(id); confetti();
-    if (me === id && !isLeaderId(me)) { seenSet(me); sessionViewed.add(me); } // 1ra y unica vista
+    if (me === id) { seenSet(me); sessionViewed.add(me); } // 1ra y unica vista
   } else flipped.delete(id);
 });
 
 function buildWho() {
-  const html = '<option value="">— Elige tu nombre —</option>' + data.families.map((f) =>
+  $('cWho').innerHTML = '<option value="">— Elige tu nombre —</option>' + data.families.map((f) =>
     `<optgroup label="${esc(f.name)}">${f.people.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}</optgroup>`).join('');
-  $('aWho').innerHTML = html; $('cWho').innerHTML = html;
-}
-function toast(msg) {
-  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
-  document.body.appendChild(t); setTimeout(() => t.remove(), 3200);
 }
 
 $('search').addEventListener('input', render);
 
-/* ---------- menu y secciones ---------- */
 /* ---------- configuracion del participante (recuerda quien eres en este dispositivo) ---------- */
 const ME_KEY = 'sorteo_me';
 function getMe() { try { const v = localStorage.getItem(ME_KEY); return v && byId[v] ? v : null; } catch { return null; } }
@@ -162,19 +111,18 @@ function renderCfg() {
   const id = $('cWho').value;
   $('cBody').classList.toggle('hidden', !id);
   if (!id || !byId[id]) return;
-  $('cAvatar').textContent = avatarOf(id);
   $('cName').textContent = byId[id].name;
-  $('cStatus').textContent = isLeaderId(id) ? '👑 Líder de familia' : 'Participante';
-  $('cStatus').className = 'cstat' + (isLeaderId(id) ? ' ok' : '');
+  $('cStatus').textContent = seenGet(id) ? '✅ Ya viste tu amigo secreto' : 'Aún no has visto tu amigo secreto';
+  $('cStatus').className = 'cstat' + (seenGet(id) ? ' ok' : '');
 }
 function initCfg() {
   const me = getMe(); if (me) $('cWho').value = me;
   renderCfg();
   $('cWho').addEventListener('change', () => { setMe($('cWho').value); renderCfg(); render(); });
-  $('cAvatarBtn').addEventListener('click', () => openAvatar($('cWho').value));
   $('cForget').addEventListener('click', () => { setMe(null); $('cWho').value = ''; renderCfg(); render(); toast('Listo: este dispositivo ya no te recuerda.'); });
 }
 
+/* ---------- menu y secciones ---------- */
 const ROUTES = ['sorteo', 'itinerario', 'config'];
 function setMenu(open) { $('ddMenu').classList.toggle('hidden', !open); $('ddBtn').setAttribute('aria-expanded', String(open)); }
 function route() {
@@ -203,17 +151,11 @@ async function loadItinerary() {
 }
 
 (async () => {
-  store = await getStore();
   const { current } = await (await fetch('sorteos/index.json', { cache: 'no-store' })).json();
   data = await (await fetch(`sorteos/${current}.json`, { cache: 'no-store' })).json();
   data.families.forEach((f) => f.people.forEach((p) => (byId[p.id] = p)));
   $('year').textContent = data.year;
   buildWho();
-  // los avatares se guardan por año (ej. 2026_p01): cada año empieza limpio
-  try {
-    const all = await store.getAllProfiles();
-    for (const id of Object.keys(byId)) if (all[`${data.year}_${id}`]) profiles[id] = all[`${data.year}_${id}`];
-  } catch (e) { console.error(e); }
   initCfg();
   render();
   route();

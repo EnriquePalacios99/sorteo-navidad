@@ -215,15 +215,12 @@
   <header>
     <span class="eyebrow">🎄 Navidad en familia</span>
     <h1>Amigo Secreto <span class="year" id="year"></span></h1>
-    <p class="lead">Primero elige quién eres en <b>⚙️ Configuración</b>. Luego toca tu cartilla: al reverso está tu amigo secreto. <b>Solo puedes verlo una vez</b>; los líderes 👑 ven toda su familia.</p>
+    <p class="lead">Primero elige quién eres en <b>⚙️ Configuración</b>. Luego toca tu cartilla: al reverso está tu amigo secreto. <b>Solo puedes verlo una vez</b>.</p>
     <div id="banner" class="banner hidden"></div>
 
     <div class="stats">
       <div class="stat"><b id="statTotal">–</b><span>Participantes</span></div>
       <div class="stat"><b id="statFams">–</b><span>Familias</span></div>
-    </div>
-    <div class="ctas">
-      <button class="cta ghost" id="openAvatar">🎨 Elegir mi avatar</button>
     </div>
   </header>
 
@@ -245,38 +242,21 @@
     <header>
       <span class="eyebrow">⚙️ Mi perfil</span>
       <h1>Configu<span class="year">ración</span></h1>
-      <p class="lead">Elige quién eres una vez. Este dispositivo te recordará y podrás personalizar tu cartilla.</p>
+      <p class="lead">Elige quién eres una vez. Este dispositivo te recordará para que puedas ver tu cartilla.</p>
     </header>
     <div class="cfg">
       <label for="cWho">¿Quién eres?</label>
       <select id="cWho"></select>
       <div id="cBody" class="hidden">
         <div class="cfg-me">
-          <div id="cAvatar" class="av-prev">❔</div>
           <div><div id="cName" class="cname"></div><div id="cStatus" class="cstat"></div></div>
         </div>
-        <button class="cfg-btn" id="cAvatarBtn">🎨 Cambiar mi avatar</button>
         <button class="cfg-btn quiet" id="cForget">Olvidar este dispositivo</button>
       </div>
     </div>
   </div>
 </div>
 
-<div id="avModal" class="modal hidden">
-  <div class="sheet">
-    <h3>🎨 Elige tu avatar</h3>
-    <p>Es la carita de tu cartilla. Se guarda en este dispositivo.</p>
-    <label for="aWho">¿Quién eres?</label>
-    <select id="aWho"></select>
-    <div id="aBody" class="hidden">
-      <div class="av-prev-wrap"><div id="aPrev" class="av-prev">❔</div></div>
-      <div id="aTabs" class="atabs"></div>
-      <div id="aGrid" class="av-grid"></div>
-    </div>
-    <div class="err" id="aErr"></div>
-    <div class="row"><button class="cancel" id="aCancel">Cerrar</button><button class="save hidden" id="aSave">💾 Guardar avatar</button></div>
-  </div>
-</div>
 <script type="module" src="app.js"></script>
 </body>
 </html>
