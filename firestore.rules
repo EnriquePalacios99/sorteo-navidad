@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Preferencias de regalo: visibles para todos. Un documento por persona y por año (2026_p01, ...).
+    match /profiles/{id} {
+      allow read: if true;
+      allow create, update: if id.matches('^[0-9]{4}_p[0-9]{2}$')
+                            && request.resource.data.keys().hasOnly(['prefs', 'avatar', 'ts'])
+                            && request.resource.size < 10000;
+      allow delete: if false;
+    }
+  }
+}

@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0b2218">
+<title>Amigo Secreto Navideño</title>
+<style>
+  :root {
+    --bg:#0b2218; --bg2:#14402c; --glass:rgba(255,255,255,.08); --line:rgba(255,255,255,.14);
+    --paper:#fffaf0; --ink:#26302b; --mute:#6c7a72; --red:#d83a3a; --gold:#f0b429; --green:#1f8f5a;
+    --radius:20px;
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; min-height:100vh; padding:0 16px 70px; color:#fff;
+         font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+         background:
+           radial-gradient(900px 500px at 10% -10%, #1f6b46 0%, transparent 60%),
+           radial-gradient(700px 500px at 100% 0%, #5a1d2a 0%, transparent 55%),
+           linear-gradient(180deg, var(--bg2), var(--bg)) fixed; }
+  .wrap { max-width:1040px; margin:0 auto; }
+  .hidden { display:none !important; }
+
+  /* cabecera */
+  header { text-align:center; padding:34px 0 18px; }
+  .eyebrow { display:inline-block; font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; color:var(--gold);
+             background:rgba(240,180,41,.12); border:1px solid rgba(240,180,41,.3); padding:5px 12px; border-radius:999px; }
+  h1 { margin:14px 0 6px; font-size:clamp(1.9rem, 5vw, 2.8rem); font-weight:800; letter-spacing:-.02em; line-height:1.1; }
+  h1 .year { background:linear-gradient(90deg, var(--gold), #ff8a5c); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .lead { margin:0 auto; max-width:480px; color:#c5dccf; font-size:1rem; line-height:1.5; }
+  .banner { margin:14px auto 0; max-width:520px; background:rgba(255,243,205,.95); color:#6d5200; border-radius:12px; padding:8px 12px; font-size:.8rem; }
+
+  /* estadisticas */
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:22px auto 0; max-width:560px; }
+  .stat { background:var(--glass); border:1px solid var(--line); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+          border-radius:16px; padding:14px 8px; }
+  .stat b { display:block; font-size:1.7rem; font-weight:800; line-height:1.1; }
+  .stat span { font-size:.72rem; color:#b6d0c1; text-transform:uppercase; letter-spacing:.06em; }
+  .progress { max-width:560px; margin:12px auto 0; }
+  .bar { height:8px; background:rgba(255,255,255,.12); border-radius:999px; overflow:hidden; }
+  .bar i { display:block; height:100%; width:0; border-radius:999px; background:linear-gradient(90deg, var(--green), var(--gold)); transition:width .6s ease; }
+  .progress small { display:block; margin-top:6px; color:#9dbfad; font-size:.75rem; }
+
+  /* buscador fijo */
+  .searchbar { position:sticky; top:56px; z-index:10; padding:12px 0; margin:12px 0 0;
+               background:linear-gradient(180deg, var(--bg) 60%, transparent); }
+  #search { display:block; width:100%; max-width:440px; margin:0 auto; padding:14px 18px; font-size:1rem; color:#fff; font-family:inherit;
+            background:var(--glass); border:1px solid var(--line); border-radius:999px; outline:none; text-align:center; }
+  #search::placeholder { color:#9dbfad; }
+  #search:focus { border-color:var(--gold); box-shadow:0 0 0 4px rgba(240,180,41,.18); }
+
+  /* familias */
+  h2.fam { display:flex; align-items:center; gap:10px; margin:28px 0 12px; font-size:.95rem; font-weight:700; letter-spacing:.02em; }
+  h2.fam::before { content:""; width:10px; height:10px; border-radius:50%; background:hsl(var(--h) 80% 60%); box-shadow:0 0 12px hsl(var(--h) 80% 60%); }
+  h2.fam em { font-style:normal; font-size:.72rem; color:#cfe3d8; background:var(--glass); border:1px solid var(--line); border-radius:999px; padding:2px 9px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:16px; }
+  .none { text-align:center; color:#b6d0c1; margin-top:40px; }
+
+  /* cartilla volteable */
+  .flip { perspective:1100px; height:300px; cursor:pointer; outline:none; }
+  .inner { position:relative; width:100%; height:100%; transition:transform .8s cubic-bezier(.3,.1,.2,1); transform-style:preserve-3d; }
+  .flip:hover .inner { transform:translateY(-4px); }
+  .flip.flipped .inner, .flip.flipped:hover .inner { transform:rotateY(180deg); }
+  .face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:var(--radius);
+          padding:18px 16px; display:flex; flex-direction:column; align-items:center; overflow:hidden; box-shadow:0 14px 34px rgba(0,0,0,.35); }
+  .front { justify-content:center; text-align:center;
+           background: radial-gradient(circle at 85% 0%, rgba(255,255,255,.22), transparent 45%),
+                       linear-gradient(155deg, hsl(var(--h) 68% 46%), hsl(var(--h) 62% 26%));
+           border:1px solid rgba(255,255,255,.22); }
+  .avatar { width:68px; height:68px; border-radius:50%; display:grid; place-items:center; font-size:2.2rem; font-weight:800;
+            background:rgba(255,255,255,.2); border:2px solid rgba(255,255,255,.55); box-shadow:inset 0 0 18px rgba(255,255,255,.15); }
+  .avatar.sm { width:42px; height:42px; font-size:1.5rem; flex:none; background:hsl(var(--h) 60% 90%); border:2px solid hsl(var(--h) 68% 46%); box-shadow:none; }
+  .av-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:6px; }
+  .av { padding:6px 0; font-size:1.5rem; line-height:1.2; background:#fff; border:2px solid #e8e0cd; border-radius:12px; cursor:pointer; }
+  .av:hover { border-color:var(--gold); }
+  .av.on { border-color:var(--green); background:#e8f6ee; transform:scale(1.08); }
+  .nm { margin:12px 0 8px; font-size:1.2rem; font-weight:800; line-height:1.2; word-break:break-word; }
+  .chip { font-size:.72rem; padding:4px 11px; border-radius:999px; background:rgba(0,0,0,.25); }
+  .chip.ok { background:rgba(46,196,120,.9); color:#05301c; font-weight:700; }
+  .hint { position:absolute; bottom:14px; font-size:.78rem; opacity:.85; }
+  .back { background:var(--paper); color:var(--ink); transform:rotateY(180deg); border:1px solid #efe4cb; text-align:center; align-items:stretch; }
+  .back .lab { font-size:.68rem; text-transform:uppercase; letter-spacing:.12em; color:var(--mute); }
+  .friend-row { display:flex; align-items:center; gap:10px; margin:8px 0 10px; text-align:left; }
+  .friend { font-size:1.12rem; font-weight:800; color:hsl(var(--h) 68% 40%); line-height:1.2; word-break:break-word; }
+  .back .prefs { flex:1; overflow-y:auto; text-align:left; font-size:.82rem; border-top:1px dashed #e3d7bb; padding-top:10px; }
+  .pref-row { margin-bottom:8px; }
+  .pref-row b { display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.06em; color:var(--mute); }
+  .pref-row span { white-space:pre-wrap; word-break:break-word; }
+  .empty { color:var(--mute); font-style:italic; }
+  .edit-front { margin-top:4px; width:100%; padding:11px 8px; border:0; border-radius:12px; background:#fff; color:#26302b; font-weight:800; font-size:.85rem; font-family:inherit; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,.25); transition:transform .15s; }
+  .edit-front:hover { transform:scale(1.03); }
+  .edit-front.done { background:rgba(46,196,120,.95); color:#05301c; }
+  .tap-back { margin-top:8px; text-align:center; font-size:.72rem; color:var(--mute); }
+
+  /* modal tipo hoja */
+  .modal { position:fixed; inset:0; background:rgba(4,14,9,.72); backdrop-filter:blur(4px); display:grid; place-items:center; padding:14px; z-index:30; animation:fade .2s; }
+  @keyframes fade { from { opacity:0; } }
+  .sheet { background:var(--paper); color:var(--ink); border-radius:24px; padding:24px 20px; width:100%; max-width:460px; max-height:92vh; overflow-y:auto; animation:up .28s cubic-bezier(.2,.8,.2,1); }
+  @keyframes up { from { transform:translateY(24px); opacity:0; } }
+  .sheet h3 { margin:0 0 4px; font-size:1.2rem; }
+  .sheet p { margin:0 0 4px; color:var(--mute); font-size:.9rem; line-height:1.4; }
+  .sheet label { display:block; font-size:.82rem; font-weight:700; margin:14px 0 6px; }
+  .sheet input, .sheet textarea { width:100%; padding:12px 14px; font-size:1rem; font-family:inherit; color:var(--ink); background:#fff; border:2px solid #e8e0cd; border-radius:12px; outline:none; }
+  .sheet input:focus, .sheet textarea:focus { border-color:var(--green); }
+  .sheet textarea { min-height:68px; resize:vertical; }
+  .row { display:flex; gap:10px; margin-top:18px; }
+  .row button { flex:1; padding:13px; border:0; border-radius:12px; font-weight:700; font-size:.95rem; font-family:inherit; cursor:pointer; }
+  .save { background:var(--green); color:#fff; } .save:disabled { opacity:.6; }
+  .cancel { background:#ece5d3; color:var(--ink); }
+  .err { color:var(--red); font-size:.85rem; min-height:1.1em; margin-top:8px; }
+
+  /* menu superior */
+  .topbar { position:sticky; top:0; z-index:25; height:56px; margin:0 -16px; padding:0 16px; background:rgba(11,34,24,.82);
+            backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-bottom:1px solid var(--line); }
+  .topin { max-width:1040px; height:100%; margin:0 auto; display:flex; align-items:center; justify-content:space-between; }
+  .brand { color:#fff; text-decoration:none; font-weight:800; letter-spacing:-.01em; }
+  .dd { position:relative; }
+  #ddBtn { display:flex; align-items:center; gap:6px; padding:9px 16px; border-radius:999px; border:1px solid var(--line); background:var(--glass);
+           color:#fff; font-family:inherit; font-size:.9rem; font-weight:700; cursor:pointer; }
+  #ddBtn:hover, #ddBtn[aria-expanded="true"] { border-color:var(--gold); }
+  .ddmenu { position:absolute; right:0; top:calc(100% + 8px); min-width:250px; padding:8px; border-radius:16px; background:var(--paper);
+            box-shadow:0 18px 40px rgba(0,0,0,.45); animation:up .18s ease-out; }
+  .ddmenu a { display:block; padding:12px 14px; border-radius:10px; color:var(--ink); text-decoration:none; font-weight:700; font-size:.95rem; }
+  .ddmenu a:hover { background:#f1e9d3; }
+  .ddmenu a.on { background:var(--ink); color:#fff; }
+
+  /* itinerario */
+  .day { margin:26px 0 8px; }
+  .day h2 { margin:0 0 12px; font-size:1.05rem; color:var(--gold); }
+  .tl { position:relative; margin-left:8px; padding-left:22px; border-left:2px solid var(--line); }
+  .ev { position:relative; margin-bottom:14px; padding:14px 16px; background:var(--glass); border:1px solid var(--line); border-radius:16px; backdrop-filter:blur(8px); }
+  .ev::before { content:""; position:absolute; left:-30px; top:20px; width:12px; height:12px; border-radius:50%; background:var(--gold); box-shadow:0 0 0 4px rgba(240,180,41,.2); }
+  .ev .time { display:inline-block; font-weight:800; font-size:.85rem; color:#3a2a00; background:var(--gold); border-radius:999px; padding:2px 10px; }
+  .ev .t { margin:8px 0 2px; font-size:1.05rem; font-weight:800; }
+  .ev .p { font-size:.85rem; color:#b6d0c1; }
+  .ev .n { margin-top:6px; font-size:.85rem; color:#d8e8de; }
+
+  .cta { margin-top:18px; padding:14px 26px; border:0; border-radius:999px; font-family:inherit; font-size:1rem; font-weight:800; cursor:pointer;
+         color:#3a2a00; background:linear-gradient(90deg, var(--gold), #ffcf5c); box-shadow:0 8px 22px rgba(240,180,41,.35); transition:transform .15s; }
+  .cta:hover { transform:translateY(-2px); }
+  .cfg { max-width:460px; margin:10px auto 0; padding:22px 20px; background:var(--glass); border:1px solid var(--line); border-radius:var(--radius); backdrop-filter:blur(10px); }
+  .cfg label { display:block; font-size:.82rem; font-weight:700; margin-bottom:6px; color:#cfe3d8; }
+  .cfg select { width:100%; padding:13px 14px; font-size:1rem; font-family:inherit; color:var(--ink); background:#fff; border:2px solid transparent; border-radius:12px; }
+  .cfg-me { display:flex; align-items:center; gap:14px; margin:18px 0 6px; }
+  .cfg-me .av-prev { width:70px; height:70px; font-size:2.4rem; flex:none; }
+  .cname { font-size:1.2rem; font-weight:800; }
+  .cstat { display:inline-block; margin-top:4px; font-size:.75rem; padding:3px 10px; border-radius:999px; background:rgba(0,0,0,.28); }
+  .cstat.ok { background:rgba(46,196,120,.9); color:#05301c; font-weight:700; }
+  .cfg-btn { display:block; width:100%; margin-top:10px; padding:14px; border:0; border-radius:14px; font-family:inherit; font-size:1rem; font-weight:800; cursor:pointer; background:var(--paper); color:var(--ink); }
+  .cfg-btn:hover { background:#f1e9d3; }
+  .cfg-btn.quiet { background:transparent; color:#b6d0c1; border:1px solid var(--line); font-weight:600; font-size:.85rem; }
+  .ctas { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .cta.ghost { background:var(--glass); color:#fff; border:1px solid var(--line); box-shadow:none; }
+  .av-prev-wrap { display:grid; place-items:center; margin:14px 0 6px; }
+  .av-prev { width:92px; height:92px; border-radius:50%; display:grid; place-items:center; font-size:3.2rem; background:#fff; border:3px solid var(--gold); box-shadow:0 8px 20px rgba(0,0,0,.15); }
+  .atabs { display:flex; gap:6px; overflow-x:auto; padding:8px 0 10px; }
+  .atab { flex:none; padding:7px 12px; border:2px solid #e8e0cd; background:#fff; border-radius:999px; font-family:inherit; font-size:.8rem; font-weight:700; color:var(--mute); cursor:pointer; }
+  .atab.on { border-color:var(--green); color:var(--green); background:#e8f6ee; }
+  .sheet select { width:100%; padding:12px 14px; font-size:1rem; font-family:inherit; color:var(--ink); background:#fff; border:2px solid #e8e0cd; border-radius:12px; }
+  .toast { position:fixed; left:50%; bottom:26px; transform:translateX(-50%); background:#fff; color:#05301c; font-weight:700; padding:12px 20px;
+           border-radius:999px; box-shadow:0 10px 30px rgba(0,0,0,.4); z-index:50; animation:up .3s; max-width:90vw; text-align:center; }
+  .confetti { position:fixed; top:-30px; font-size:1.6rem; pointer-events:none; animation:fall linear forwards; z-index:40; }
+  @keyframes fall { to { transform:translateY(110vh) rotate(360deg); } }
+
+  @media (max-width:520px) { .grid { grid-template-columns:repeat(2, 1fr); gap:12px; } .flip { height:290px; } .nm { font-size:1.05rem; } .avatar { width:58px; height:58px; font-size:1.8rem; } }
+  @media (max-width:360px) { .grid { grid-template-columns:1fr; } }
+  @media (prefers-reduced-motion:reduce) { .inner { transition:none; } .confetti { display:none; } }
+</style>
+</head>
+<body>
+<nav class="topbar">
+  <div class="topin">
+    <a class="brand" href="#/sorteo">🎄 Amigo Secreto</a>
+    <div class="dd">
+      <button id="ddBtn" aria-haspopup="true" aria-expanded="false">☰ Menú <span>▾</span></button>
+      <div id="ddMenu" class="ddmenu hidden" role="menu">
+        <a href="#/sorteo" data-route="sorteo" role="menuitem">🎁 Sorteo</a>
+        <a href="#/itinerario" data-route="itinerario" role="menuitem">📅 Itinerario de actividades</a>
+        <a href="#/config" data-route="config" role="menuitem">⚙️ Configuración</a>
+      </div>
+    </div>
+  </div>
+</nav>
+<div class="wrap">
+  <div id="view-sorteo">
+  <header>
+    <span class="eyebrow">🎄 Navidad en familia</span>
+    <h1>Amigo Secreto <span class="year" id="year"></span></h1>
+    <p class="lead">Busca tu cartilla y tócala: al reverso está la persona a la que le regalas, con sus gustos.</p>
+    <div id="banner" class="banner hidden"></div>
+
+    <div class="stats">
+      <div class="stat"><b id="statTotal">–</b><span>Participantes</span></div>
+      <div class="stat"><b id="statFams">–</b><span>Familias</span></div>
+      <div class="stat"><b id="statReady">–</b><span>Con gustos</span></div>
+    </div>
+    <div class="progress">
+      <div class="bar"><i id="barFill"></i></div>
+      <small>Llena tus gustos para ayudar a quien te regala 💡</small>
+    </div>
+    <div class="ctas">
+      <button class="cta" id="openPrefs">✍️ Llenar mis gustos</button>
+      <button class="cta ghost" id="openAvatar">🎨 Elegir mi avatar</button>
+    </div>
+  </header>
+
+  <div class="searchbar"><input id="search" type="search" placeholder="🔍 Busca tu nombre…" autocomplete="off"></div>
+  <main id="board"></main>
+  </div>
+
+  <div id="view-itinerario" class="hidden">
+    <header>
+      <span class="eyebrow">📅 Programa</span>
+      <h1>Itinerario de <span class="year">actividades</span></h1>
+      <p class="lead">Así será nuestra celebración. ¡Anota las horas!</p>
+      <div id="itiAviso" class="banner hidden"></div>
+    </header>
+    <div id="timeline"></div>
+  </div>
+
+  <div id="view-config" class="hidden">
+    <header>
+      <span class="eyebrow">⚙️ Mi perfil</span>
+      <h1>Configu<span class="year">ración</span></h1>
+      <p class="lead">Elige quién eres una vez. Este dispositivo te recordará y podrás personalizar tu cartilla.</p>
+    </header>
+    <div class="cfg">
+      <label for="cWho">¿Quién eres?</label>
+      <select id="cWho"></select>
+      <div id="cBody" class="hidden">
+        <div class="cfg-me">
+          <div id="cAvatar" class="av-prev">❔</div>
+          <div><div id="cName" class="cname"></div><div id="cStatus" class="cstat"></div></div>
+        </div>
+        <button class="cfg-btn" id="cAvatarBtn">🎨 Cambiar mi avatar</button>
+        <button class="cfg-btn" id="cPrefsBtn">✍️ Mis gustos de regalo</button>
+        <button class="cfg-btn quiet" id="cForget">Olvidar este dispositivo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal" class="modal hidden">
+  <div class="sheet">
+    <h3 id="mTitle"></h3>
+    <p>Cuéntale a quien te regala qué te gustaría. Lo verá quien abra tu cartilla.</p>
+    <label for="mWho">¿Quién eres?</label>
+    <select id="mWho"></select>
+    <div id="mForm" class="hidden">
+      <label for="p_likes">Me gusta / mis hobbies</label>
+      <textarea id="p_likes" placeholder="Ej: café, libros, plantas, fútbol…"></textarea>
+      <label for="p_i1">Ideas concretas de regalo</label>
+      <input id="p_i1" placeholder="Idea 1"><input id="p_i2" placeholder="Idea 2" style="margin-top:6px"><input id="p_i3" placeholder="Idea 3" style="margin-top:6px">
+      <label for="p_size">Tallas / colores favoritos</label>
+      <input id="p_size" placeholder="Ej: talla M, me gusta el azul">
+      <label for="p_no">Prefiero que NO me regalen</label>
+      <input id="p_no" placeholder="Ej: perfumes, ropa…">
+    </div>
+    <div class="err" id="mErr"></div>
+    <div class="row"><button class="cancel" id="mCancel">Cerrar</button><button class="save hidden" id="mSave">💾 Guardar</button></div>
+  </div>
+</div>
+<div id="avModal" class="modal hidden">
+  <div class="sheet">
+    <h3>🎨 Elige tu avatar</h3>
+    <p>Es la carita que aparece en tu cartilla y que verá quien te regala.</p>
+    <label for="aWho">¿Quién eres?</label>
+    <select id="aWho"></select>
+    <div id="aBody" class="hidden">
+      <div class="av-prev-wrap"><div id="aPrev" class="av-prev">❔</div></div>
+      <div id="aTabs" class="atabs"></div>
+      <div id="aGrid" class="av-grid"></div>
+    </div>
+    <div class="err" id="aErr"></div>
+    <div class="row"><button class="cancel" id="aCancel">Cerrar</button><button class="save hidden" id="aSave">💾 Guardar avatar</button></div>
+  </div>
+</div>
+<script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+{
+ "year": 2026,
+ "families": [
+  {
+   "name": "Fam Pa",
+   "people": [
+    {
+     "id": "p01",
+     "name": "Enrique"
+    },
+    {
+     "id": "p02",
+     "name": "Luis (Abuelo)"
+    },
+    {
+     "id": "p03",
+     "name": "Genoveva"
+    }
+   ]
+  },
+  {
+   "name": "Fam RaRe",
+   "people": [
+    {
+     "id": "p04",
+     "name": "Katy"
+    },
+    {
+     "id": "p05",
+     "name": "Marypaz"
+    },
+    {
+     "id": "p06",
+     "name": "Mariajose"
+    },
+    {
+     "id": "p07",
+     "name": "Santiago"
+    }
+   ]
+  },
+  {
+   "name": "Fam MaRe",
+   "people": [
+    {
+     "id": "p08",
+     "name": "Mariana"
+    },
+    {
+     "id": "p09",
+     "name": "Ariana"
+    },
+    {
+     "id": "p10",
+     "name": "Alejandra"
+    },
+    {
+     "id": "p11",
+     "name": "Dylan"
+    }
+   ]
+  },
+  {
+   "name": "Fam PaHi",
+   "people": [
+    {
+     "id": "p12",
+     "name": "Luis (Hijo)"
+    },
+    {
+     "id": "p13",
+     "name": "Liz"
+    },
+    {
+     "id": "p14",
+     "name": "Mariangeles"
+    },
+    {
+     "id": "p15",
+     "name": "Luis (Nieto)"
+    },
+    {
+     "id": "p16",
+     "name": "Ana"
+    }
+   ]
+  },
+  {
+   "name": "Fam Va",
+   "people": [
+    {
+     "id": "p17",
+     "name": "Rouss"
+    },
+    {
+     "id": "p18",
+     "name": "Lucero"
+    },
+    {
+     "id": "p19",
+     "name": "Valeria"
+    },
+    {
+     "id": "p20",
+     "name": "Vanessa"
+    }
+   ]
+  },
+  {
+   "name": "Fam ReAn",
+   "people": [
+    {
+     "id": "p21",
+     "name": "Walter"
+    },
+    {
+     "id": "p22",
+     "name": "Dora"
+    }
+   ]
+  },
+  {
+   "name": "Fam CaAn",
+   "people": [
+    {
+     "id": "p23",
+     "name": "Graciela"
+    },
+    {
+     "id": "p24",
+     "name": "Emilio"
+    },
+    {
+     "id": "p25",
+     "name": "Milagros"
+    },
+    {
+     "id": "p26",
+     "name": "Johansen"
+    }
+   ]
+  }
+ ],
+ "assign": {
+  "p19": "p07",
+  "p07": "p20",
+  "p20": "p09",
+  "p09": "p16",
+  "p16": "p01",
+  "p01": "p11",
+  "p11": "p18",
+  "p18": "p23",
+  "p23": "p14",
+  "p14": "p06",
+  "p06": "p02",
+  "p02": "p13",
+  "p13": "p21",
+  "p21": "p26",
+  "p26": "p10",
+  "p10": "p05",
+  "p05": "p03",
+  "p03": "p12",
+  "p12": "p22",
+  "p22": "p15",
+  "p15": "p17",
+  "p17": "p24",
+  "p24": "p04",
+  "p04": "p25",
+  "p25": "p08",
+  "p08": "p19"
+ }
+}

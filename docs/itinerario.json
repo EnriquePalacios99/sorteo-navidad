@@ -1,0 +1,14 @@
+{
+  "aviso": "Lugar por confirmar.",
+  "days": [
+    {
+      "label": "25 de diciembre · Navidad",
+      "items": [
+        { "time": "4:00 pm", "title": "Recepción", "place": "Por definir", "note": "Llegada y bienvenida. ¡Trae tu buena energía navideña!" },
+        { "time": "5:00 pm", "title": "Juegos", "place": "Por definir", "note": "Dinámicas y juegos para toda la familia." },
+        { "time": "6:00 pm", "title": "Amigo Secreto", "place": "Por definir", "note": "Entrega de regalos. Revisa tu cartilla antes para saber a quién le regalas." },
+        { "time": "7:00 pm", "title": "Chocolatada", "place": "Por definir", "note": "Chocolate caliente y panetón para cerrar la tarde." }
+      ]
+    }
+  ]
+}
