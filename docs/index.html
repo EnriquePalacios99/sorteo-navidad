@@ -20,7 +20,7 @@
            radial-gradient(900px 500px at 10% -10%, #1f6b46 0%, transparent 60%),
            radial-gradient(700px 500px at 100% 0%, #5a1d2a 0%, transparent 55%),
            linear-gradient(180deg, var(--bg2), var(--bg)) fixed; }
-  .wrap { max-width:1040px; margin:0 auto; }
+  .wrap { max-width:1280px; margin:0 auto; }
   .hidden { display:none !important; }
 
   /* cabecera */
@@ -56,6 +56,11 @@
   h2.fam::before { content:""; width:10px; height:10px; border-radius:50%; background:hsl(var(--h) 80% 60%); box-shadow:0 0 12px hsl(var(--h) 80% 60%); }
   h2.fam em { font-style:normal; font-size:.72rem; color:#cfe3d8; background:var(--glass); border:1px solid var(--line); border-radius:999px; padding:2px 9px; }
   .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:16px; }
+  /* familias una al costado de otra: cada familia es una columna con sus cartillas */
+  .fams { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:18px; align-items:start; margin-top:18px; }
+  .fams > section { background:rgba(255,255,255,.05); border:1px solid var(--line); border-radius:24px; padding:14px; }
+  .fams h2.fam { margin:2px 0 14px; }
+  .fams .grid { grid-template-columns:1fr; gap:14px; }
   .none { text-align:center; color:#b6d0c1; margin-top:40px; }
 
   /* cartilla volteable */

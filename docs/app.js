@@ -109,13 +109,14 @@ function updateStats() {
 
 function render() {
   const q = norm($('search').value.trim());
-  $('board').innerHTML = data.families.map((f, i) => {
+  const cols = data.families.map((f, i) => {
     const people = f.people.filter((p) => !q || norm(p.name).includes(q) || norm(f.name).includes(q));
     const hue = HUES[i % HUES.length];
     return people.length
       ? `<section><h2 class="fam" style="--h:${hue}"><span>${esc(f.name)}</span><em>${people.length}</em></h2><div class="grid">${people.map((p) => cardHtml(p, hue)).join('')}</div></section>`
       : '';
-  }).join('') || '<p class="none">No encontré ese nombre 🤔</p>';
+  }).join('');
+  $('board').innerHTML = cols ? `<div class="fams">${cols}</div>` : '<p class="none">No encontré ese nombre 🤔</p>';
   updateStats();
   renderCfg();
 }
