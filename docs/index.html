@@ -33,7 +33,10 @@
   .banner { margin:14px auto 0; max-width:520px; background:rgba(255,243,205,.95); color:#6d5200; border-radius:12px; padding:8px 12px; font-size:.8rem; }
 
   /* estadisticas */
-  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:22px auto 0; max-width:560px; }
+  .stats { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:22px auto 0; max-width:380px; }
+  .friend-big { display:flex; flex-direction:column; align-items:center; gap:8px; margin-top:6px; flex:1; justify-content:center; }
+  .friend-big .avatar { background:hsl(var(--h) 60% 92%); border-color:hsl(var(--h) 68% 46%); }
+  .friend-big .friend { font-size:1.35rem; text-align:center; }
   .stat { background:var(--glass); border:1px solid var(--line); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
           border-radius:16px; padding:14px 8px; }
   .stat b { display:block; font-size:1.7rem; font-weight:800; line-height:1.1; }
@@ -218,14 +221,8 @@
     <div class="stats">
       <div class="stat"><b id="statTotal">–</b><span>Participantes</span></div>
       <div class="stat"><b id="statFams">–</b><span>Familias</span></div>
-      <div class="stat"><b id="statReady">–</b><span>Con gustos</span></div>
-    </div>
-    <div class="progress">
-      <div class="bar"><i id="barFill"></i></div>
-      <small>Llena tus gustos para ayudar a quien te regala 💡</small>
     </div>
     <div class="ctas">
-      <button class="cta" id="openPrefs">✍️ Llenar mis gustos</button>
       <button class="cta ghost" id="openAvatar">🎨 Elegir mi avatar</button>
     </div>
   </header>
@@ -259,37 +256,16 @@
           <div><div id="cName" class="cname"></div><div id="cStatus" class="cstat"></div></div>
         </div>
         <button class="cfg-btn" id="cAvatarBtn">🎨 Cambiar mi avatar</button>
-        <button class="cfg-btn" id="cPrefsBtn">✍️ Mis gustos de regalo</button>
         <button class="cfg-btn quiet" id="cForget">Olvidar este dispositivo</button>
       </div>
     </div>
   </div>
 </div>
 
-<div id="modal" class="modal hidden">
-  <div class="sheet">
-    <h3 id="mTitle"></h3>
-    <p>Cuéntale a quien te regala qué te gustaría. Lo verá quien abra tu cartilla.</p>
-    <label for="mWho">¿Quién eres?</label>
-    <select id="mWho"></select>
-    <div id="mForm" class="hidden">
-      <label for="p_likes">Me gusta / mis hobbies</label>
-      <textarea id="p_likes" placeholder="Ej: café, libros, plantas, fútbol…"></textarea>
-      <label for="p_i1">Ideas concretas de regalo</label>
-      <input id="p_i1" placeholder="Idea 1"><input id="p_i2" placeholder="Idea 2" style="margin-top:6px"><input id="p_i3" placeholder="Idea 3" style="margin-top:6px">
-      <label for="p_size">Tallas / colores favoritos</label>
-      <input id="p_size" placeholder="Ej: talla M, me gusta el azul">
-      <label for="p_no">Prefiero que NO me regalen</label>
-      <input id="p_no" placeholder="Ej: perfumes, ropa…">
-    </div>
-    <div class="err" id="mErr"></div>
-    <div class="row"><button class="cancel" id="mCancel">Cerrar</button><button class="save hidden" id="mSave">💾 Guardar</button></div>
-  </div>
-</div>
 <div id="avModal" class="modal hidden">
   <div class="sheet">
     <h3>🎨 Elige tu avatar</h3>
-    <p>Es la carita que aparece en tu cartilla y que verá quien te regala.</p>
+    <p>Es la carita de tu cartilla. Se guarda en este dispositivo.</p>
     <label for="aWho">¿Quién eres?</label>
     <select id="aWho"></select>
     <div id="aBody" class="hidden">

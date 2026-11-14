@@ -2,10 +2,9 @@ import { getStore } from './store.js';
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const FIELDS = { likes: 'p_likes', i1: 'p_i1', i2: 'p_i2', i3: 'p_i3', size: 'p_size', no: 'p_no' };
 const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
-let data, store, profiles = {}, byId = {}, editingId = null;
+let data, store, profiles = {}, byId = {};
 const flipped = new Set();
 
 function confetti() {
@@ -18,15 +17,6 @@ function confetti() {
     s.style.animationDelay = Math.random() * 0.5 + 's';
     document.body.appendChild(s); setTimeout(() => s.remove(), 5500);
   }
-}
-
-function prefsHtml(id) {
-  const p = profiles[id] && profiles[id].prefs;
-  const rows = p ? [['Le gusta', p.likes], ['Ideas de regalo', [p.i1, p.i2, p.i3].filter(Boolean).join('\n')],
-    ['Tallas / colores', p.size], ['Prefiere que NO le regalen', p.no]].filter(([, v]) => v) : [];
-  return rows.length
-    ? rows.map(([k, v]) => `<div class="pref-row"><b>${k}</b><span>${esc(v)}</span></div>`).join('')
-    : '<div class="empty">Aún no llena sus gustos 💡 ¡Vuelve más tarde!</div>';
 }
 
 /* ==== acceso: ver el amigo secreto ==== */
@@ -86,7 +76,7 @@ $('aSave').addEventListener('click', async () => {
   if (!aId) return;
   $('aSave').disabled = true;
   try {
-    const rec = { ...(profiles[aId] || {}), avatar: aSel, ts: Date.now() }; // conserva los gustos ya guardados
+    const rec = { ...(profiles[aId] || {}), avatar: aSel, ts: Date.now() };
     await store.setProfile(`${data.year}_${aId}`, rec);
     profiles[aId] = rec; closeAv(); render(); toast('✅ ¡Avatar guardado! ' + aSel);
   } catch (e) { console.error(e); $('aErr').textContent = 'No se pudo guardar. Intenta de nuevo.'; }
@@ -95,7 +85,6 @@ $('aSave').addEventListener('click', async () => {
 
 function cardHtml(person, hue) {
   const friend = byId[data.assign[person.id]];
-  const filled = profiles[person.id] && profiles[person.id].prefs;
   const me = getMe(), see = can(person.id), mine = me === person.id;
   const badge = !me || see ? '' : mine ? '✅ ya la viste' : '🔒';
   return `
@@ -105,13 +94,11 @@ function cardHtml(person, hue) {
         ${isLeaderId(person.id) ? '<span class="crown" title="Líder de familia">👑</span>' : ''}${badge ? `<span class="lock">${badge}</span>` : ''}
         <div class="avatar">${avatarOf(person.id)}</div>
         <div class="nm">${esc(person.name)}</div>
-        <div class="chip ${filled ? 'ok' : ''}">${filled ? '✓ gustos listos' : 'sin gustos aún'}</div>
         <div class="hint">Toca para descubrir 🎁</div>
       </div>
       <div class="face back">
         ${see ? `<div class="lab">Te toca regalar a</div>
-        <div class="friend-row"><div class="avatar sm">${avatarOf(friend.id)}</div><div class="friend">${esc(friend.name)}</div></div>
-        <div class="prefs">${prefsHtml(friend.id)}</div>` : '<div class="lab" style="margin-top:44px">🔒 Cartilla bloqueada</div>'}
+        <div class="friend-big"><div class="avatar">${avatarOf(friend.id)}</div><div class="friend">${esc(friend.name)}</div></div>` : '<div class="lab" style="margin-top:44px">🔒 Cartilla bloqueada</div>'}
         <div class="tap-back">Toca para volver</div>
       </div>
     </div>
@@ -120,11 +107,8 @@ function cardHtml(person, hue) {
 
 function updateStats() {
   const total = Object.keys(byId).length;
-  const ready = Object.keys(byId).filter((id) => profiles[id] && profiles[id].prefs).length;
   $('statTotal').textContent = total;
   $('statFams').textContent = data.families.length;
-  $('statReady').textContent = `${ready}/${total}`;
-  $('barFill').style.width = (total ? (ready / total) * 100 : 0) + '%';
 }
 
 function render() {
@@ -157,50 +141,15 @@ $('board').addEventListener('click', (e) => {
   } else flipped.delete(id);
 });
 
-// Paso 1: elegir quien eres. Paso 2: llenar el formulario.
 function buildWho() {
   const html = '<option value="">— Elige tu nombre —</option>' + data.families.map((f) =>
     `<optgroup label="${esc(f.name)}">${f.people.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}</optgroup>`).join('');
-  $('mWho').innerHTML = html; $('aWho').innerHTML = html; $('cWho').innerHTML = html;
+  $('aWho').innerHTML = html; $('cWho').innerHTML = html;
 }
-function openModal(pre) {
-  editingId = null;
-  $('mWho').value = '';
-  $('mForm').classList.add('hidden');
-  $('mSave').classList.add('hidden');
-  $('mErr').textContent = '';
-  $('modal').classList.remove('hidden');
-  if (pre) { $('mWho').value = pre; $('mWho').dispatchEvent(new Event('change')); }
-}
-$('mWho').addEventListener('change', () => {
-  editingId = $('mWho').value || null;
-  $('mErr').textContent = '';
-  $('mForm').classList.toggle('hidden', !editingId);
-  $('mSave').classList.toggle('hidden', !editingId);
-  if (!editingId) return;
-  const p = (profiles[editingId] && profiles[editingId].prefs) || {};
-  for (const [k, el] of Object.entries(FIELDS)) $(el).value = p[k] || '';
-});
-$('openPrefs').addEventListener('click', () => openModal(getMe()));
 function toast(msg) {
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
   document.body.appendChild(t); setTimeout(() => t.remove(), 3200);
 }
-const closeModal = () => $('modal').classList.add('hidden');
-$('mCancel').addEventListener('click', closeModal);
-$('modal').addEventListener('click', (e) => e.target === $('modal') && closeModal());
-$('mSave').addEventListener('click', async () => {
-  if (!editingId) { $('mErr').textContent = 'Primero elige tu nombre.'; return; }
-  const prefs = {}; for (const [k, el] of Object.entries(FIELDS)) prefs[k] = $(el).value.trim().slice(0, 500);
-  $('mSave').disabled = true;
-  try {
-    const rec = { ...(profiles[editingId] || {}), prefs, ts: Date.now() }; // conserva el avatar elegido
-    await store.setProfile(`${data.year}_${editingId}`, rec);
-    profiles[editingId] = rec;
-    closeModal(); render(); toast('✅ ¡Gustos guardados! Quien te regala ya puede verlos.');
-  } catch (e) { console.error(e); $('mErr').textContent = 'No se pudo guardar. Intenta de nuevo.'; }
-  $('mSave').disabled = false;
-});
 
 $('search').addEventListener('input', render);
 
@@ -213,18 +162,16 @@ function renderCfg() {
   const id = $('cWho').value;
   $('cBody').classList.toggle('hidden', !id);
   if (!id || !byId[id]) return;
-  const filled = profiles[id] && profiles[id].prefs;
   $('cAvatar').textContent = avatarOf(id);
   $('cName').textContent = byId[id].name;
-  $('cStatus').textContent = (filled ? '✓ Gustos listos' : 'Aún sin gustos') + (isLeaderId(id) ? ' · 👑 Líder de familia' : '');
-  $('cStatus').className = 'cstat' + (filled ? ' ok' : '');
+  $('cStatus').textContent = isLeaderId(id) ? '👑 Líder de familia' : 'Participante';
+  $('cStatus').className = 'cstat' + (isLeaderId(id) ? ' ok' : '');
 }
 function initCfg() {
   const me = getMe(); if (me) $('cWho').value = me;
   renderCfg();
   $('cWho').addEventListener('change', () => { setMe($('cWho').value); renderCfg(); render(); });
   $('cAvatarBtn').addEventListener('click', () => openAvatar($('cWho').value));
-  $('cPrefsBtn').addEventListener('click', () => openModal($('cWho').value));
   $('cForget').addEventListener('click', () => { setMe(null); $('cWho').value = ''; renderCfg(); render(); toast('Listo: este dispositivo ya no te recuerda.'); });
 }
 
@@ -262,15 +209,11 @@ async function loadItinerary() {
   data.families.forEach((f) => f.people.forEach((p) => (byId[p.id] = p)));
   $('year').textContent = data.year;
   buildWho();
-  // los gustos se guardan por año (ej. 2026_p01): cada año empieza limpio
+  // los avatares se guardan por año (ej. 2026_p01): cada año empieza limpio
   try {
     const all = await store.getAllProfiles();
     for (const id of Object.keys(byId)) if (all[`${data.year}_${id}`]) profiles[id] = all[`${data.year}_${id}`];
   } catch (e) { console.error(e); }
-  if (store.mode === 'local') {
-    $('banner').classList.remove('hidden');
-    $('banner').textContent = '🧪 Modo local de prueba: los gustos solo se guardan en este navegador.';
-  }
   initCfg();
   render();
   route();
